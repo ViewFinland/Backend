@@ -10,6 +10,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 # Paths
 ROOT = "/api/"
 HELLO = ROOT + "Hello"
+IMG =  ROOT + "img/(\\d+)"
 
 
 # Util
@@ -30,16 +31,20 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
 class WebRouter:
     def get(self, path: str):
         request = parseRequest(path)
-        if request['path'] == ROOT:
-            return json.dumps(
-                {
-                    "code": 200
-                }
-            )
-        elif request['path'] == HELLO:
+        if re.match(IMG, request['path']):
+            _id = re.match(IMG, request['path']).group(1)
+            with open("C:\P\Hackathons\Junction\Server\images\{}.jpg".format(_id), 'rb') as file:
+                return file.read()
+        elif re.match(HELLO, request['path']):
             return json.dumps(
                 {
                     "message": "Hello"
+                }
+            )
+        elif re.match(ROOT, request['path']):
+            return json.dumps(
+                {
+                    "code": 000
                 }
             )
         else:
@@ -59,12 +64,19 @@ class WebHandler(BaseHTTPRequestHandler):
             self.end_headers()
         else:
             payload = __router__.get(self.path)
+            
+            # self.send_header("Content-Type", "application/json")
+            # self.send_header("Content-Length", len(payload))
+            # self.end_headers()
+            # # Return response
+            # self.wfile.write(bytes(payload, encoding="utf-8"))
+
+            # Send image back
             self.send_response(code=200)
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", "image/jpeg")
             self.send_header("Content-Length", len(payload))
             self.end_headers()
-            # Return response
-            self.wfile.write(bytes(payload, encoding="utf-8"))
+            self.wfile.write(payload)
 
 
 class WebServer(Thread):

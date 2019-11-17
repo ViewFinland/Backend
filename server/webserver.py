@@ -10,7 +10,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 # Paths
 ROOT = "/api/"
 HELLO = ROOT + "Hello"
-IMG =  ROOT + "img/(\\d+)"
+IMG =  ROOT + "img/(\\w+)"
 
 
 # Util
@@ -33,8 +33,12 @@ class WebRouter:
         request = parseRequest(path)
         if re.match(IMG, request['path']):
             _id = re.match(IMG, request['path']).group(1)
-            with open("C:\P\Hackathons\Junction\Server\images\{}.jpg".format(_id), 'rb') as file:
-                return file.read()
+            if _id.isnumeric():    
+                with open("C:\P\Hackathons\Junction\Server\images\{}.jpg".format(_id), 'rb') as file:
+                    return file.read()
+            else:
+                with open("C:\P\Hackathons\Junction\Server\images\{}.png".format(_id), 'rb') as file:
+                    return file.read()
         elif re.match(HELLO, request['path']):
             return json.dumps(
                 {
